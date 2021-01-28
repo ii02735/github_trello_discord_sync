@@ -1,4 +1,4 @@
 module.exports = (req, res) => {
-    const { name = 'World' } = req.query
-    res.status(200).send(`Hello ${name}!`)
+    console.log(req, res)
+    res.status(200).send(`Event fired ! Check logs from Vercel !`)
 }
