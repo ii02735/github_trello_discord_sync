@@ -33,29 +33,24 @@ const deleteUser = (req, res) => {
         const userToDeleteId = parseInt(url.parse(req.url, true).pathname.split('/').reverse()[0])
         console.log(userToDeleteId)
         fs.readFile(path_to_mapping, (err, data) => {
-            if (err && err.code === 'ENOENT') {
+            const users = JSON.parse(data)
+            const result = users.find((user) => user.id === userToDeleteId)
+            if (!result) {
                 res.writeHead(404, { 'Content-Type': 'application/json' })
                 res.write(JSON.stringify({ 'error': 'There is no such mapping' }))
+                res.end()
             } else {
-                const users = JSON.parse(data)
-                const result = users.find((user) => user.id === userToDeleteId)
-                if (!result) {
-                    res.writeHead(404, { 'Content-Type': 'application/json' })
-                    res.write(JSON.stringify({ 'error': 'There is no such mapping' }))
-                    res.end()
-                } else {
-                    fs.writeFile(path_to_mapping, JSON.stringify(users.filter((user) => user.id !== userToDeleteId)), (err) => {
-                        if (!err) {
-                            res.writeHead(200, { 'Content-Type': 'application/json' })
-                            res.write(JSON.stringify({ "message": "mapping deleted" }))
-                            res.end()
-                        } else {
-                            res.writeHead(500, { 'Content-Type': 'application/json' })
-                            res.write(JSON.stringify(err))
-                            res.end()
-                        }
-                    })
-                }
+                fs.writeFile(path_to_mapping, JSON.stringify(users.filter((user) => user.id !== userToDeleteId)), (err) => {
+                    if (!err) {
+                        res.writeHead(200, { 'Content-Type': 'application/json' })
+                        res.write(JSON.stringify({ "message": "mapping deleted" }))
+                        res.end()
+                    } else {
+                        res.writeHead(500, { 'Content-Type': 'application/json' })
+                        res.write(JSON.stringify(err))
+                        res.end()
+                    }
+                })
             }
         })
     })
@@ -63,11 +58,7 @@ const deleteUser = (req, res) => {
 
 const listUsers = (req, res) => {
     fs.readFile(path_to_mapping, (err, data) => {
-        res.writeHead(200, { 'Content-Type': 'application/json' })
-        if (err && err.code === 'ENOENT')
-            res.write(JSON.stringify([]))
-        else
-            res.write(JSON.stringify(JSON.parse(data)))
+        res.write(JSON.stringify(JSON.parse(data)))
         res.end()
     })
 }
@@ -133,39 +124,30 @@ const otherError = (req, res, errorCode, error) => {
 
 const writeMapping = (res, post, discord, github) => {
     fs.stat(path_to_mapping, (err, stat) => {
-        if (err && err.code === 'ENOENT') {
-            fs.writeFile(path_to_mapping, JSON.stringify([{ "id": 1, "trello": post.trello, "discord": { "id": discord.id, "username": discord.username }, "github": { id: github.id, username: github.login } }]), (err) => {
-                if (!err) {
-                    res.writeHead(201, { 'Content-Type': 'application/json' })
-                    res.write(JSON.stringify({ "id": 1, "trello": post.trello, "discord": { "id": discord.id, "username": discord.username, "github": { id: github.id, username: github.login } } }))
+        fs.readFile(path_to_mapping, (err, file_data) => {
+            if (!err) {
+                const users = JSON.parse(file_data)
+                try {
+                    users.forEach((user) => assert.notDeepStrictEqual({ "trello": user.trello, "discord": user.discord.id, "github": user.github.username }, { "trello": post.trello, "discord": post.discord, "github": post.github }))
+                    users.push({ "id": users.length + 1, "trello": post.trello, "discord": { "id": discord.id, "username": discord.username }, "github": { id: github.id, username: github.login } })
+                    fs.writeFile(path_to_mapping, JSON.stringify(users), (err) => {
+                        if (!err) {
+                            res.writeHead(201, { 'Content-Type': 'application/json' })
+                            res.write(JSON.stringify({ "id": users.length, "trello": post.trello, "discord": { "id": discord.id, "username": discord.username }, "github": { id: github.id, username: github.login } }))
+                            res.end()
+                        } else {
+                            res.writeHead(500, { 'Content-Type': 'application/json' })
+                            res.write(JSON.stringify(err))
+                            res.end()
+                        }
+                    })
+                } catch (assertionException) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' })
+                    res.write(JSON.stringify({ 'error': 'Mapping already exists' }))
                     res.end()
                 }
-            })
-        } else {
-            fs.readFile(path_to_mapping, (err, file_data) => {
-                if (!err) {
-                    const users = JSON.parse(file_data)
-                    try {
-                        users.forEach((user) => assert.notDeepStrictEqual({ "trello": user.trello, "discord": user.discord.id, "github": user.github.username }, { "trello": post.trello, "discord": post.discord, "github": post.github }))
-                        users.push({ "id": users.length + 1, "trello": post.trello, "discord": { "id": discord.id, "username": discord.username }, "github": { id: github.id, username: github.login } })
-                        fs.writeFile(path_to_mapping, JSON.stringify(users), (err) => {
-                            if (!err) {
-                                res.writeHead(201, { 'Content-Type': 'application/json' })
-                                res.write(JSON.stringify({ "id": users.length, "trello": post.trello, "discord": { "id": discord.id, "username": discord.username }, "github": { id: github.id, username: github.login } }))
-                                res.end()
-                            } else {
-                                res.writeHead(500, { 'Content-Type': 'application/json' })
-                                res.write(JSON.stringify(err))
-                                res.end()
-                            }
-                        })
-                    } catch (assertionException) {
-                        res.writeHead(400, { 'Content-Type': 'application/json' })
-                        res.write(JSON.stringify({ 'error': 'Mapping already exists' }))
-                        res.end()
-                    }
-                }
-            })
-        }
+            }
+        })
+
     })
 }
