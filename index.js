@@ -21,6 +21,6 @@ const server = http.createServer((req, res) => {
 
 })
 
-discordClient.login(process.env.DISCORD_BOT_TOKEN)
-
 server.listen(process.env.HOST || 3000);
+
+discordClient.login(process.env.DISCORD_BOT_TOKEN)
