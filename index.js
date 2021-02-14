@@ -21,6 +21,6 @@ const server = http.createServer((req, res) => {
 
 })
 
-server.listen(process.env.HOST || 3000);
+server.listen(process.env.PORT || 3000);
 
 discordClient.login(process.env.DISCORD_BOT_TOKEN)
