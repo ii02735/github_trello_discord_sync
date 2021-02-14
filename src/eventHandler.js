@@ -36,5 +36,3 @@ function checkIfListHasChanged(actionFromTrello) {
         (actionFromTrello.data.listBefore.name === process.env.TRELLO_COLUMN)
         || (actionFromTrello.data.listAfter.name === process.env.TRELLO_COLUMN) : false
 }
-
-discordClient.login(process.env.DISCORD_BOT_TOKEN)
