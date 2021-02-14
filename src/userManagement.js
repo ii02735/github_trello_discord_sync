@@ -1,29 +1,23 @@
 require('dotenv').config()
 
-const Discord = require('discord.js')
 const fs = require('fs')
-const client = new Discord.Client()
 const url = require('url')
 const assert = require('assert').strict
 const fetch = require('node-fetch')
-const { createServer } = require('http')
 const octokit = require('@octokit/rest')
 const Octokit = new octokit.Octokit({
     auth: process.env.GITHUB_PAT
 });
 const path_to_mapping = '../user-mapping.json'
 
-
-client.once('ready', () => console.log('ready'))
-
-module.exports = (req, res) => {
+module.exports = (req, res, client) => {
     switch (req.method) {
         case 'GET':
             listUsers(req, res)
             break;
 
         case 'POST':
-            postUser(req, res)
+            postUser(req, res, client)
             break;
 
         case 'DELETE':
@@ -78,7 +72,7 @@ const listUsers = (req, res) => {
     })
 }
 
-const postUser = (req, res) => {
+const postUser = (req, res, client) => {
     let body = ''
     req.on('data', (data) => body += data)
     req.on('end', () => {
@@ -175,5 +169,3 @@ const writeMapping = (res, post, discord, github) => {
         }
     })
 }
-
-client.login(process.env.DISCORD_BOT_TOKEN)

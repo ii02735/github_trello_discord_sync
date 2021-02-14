@@ -1,16 +1,11 @@
 require("dotenv").config()
 const url = require('url')
-const Discord = require("discord.js")
-const discordClient = new Discord.Client
 const mergedColumn = require('./mergedColumn')
 const discordActions = require('./discord')
 const githubPRActions = require('./pullRequest')
 
-discordClient.once('ready', () => {
-    console.log("client discord ready")
-})
 
-module.exports = (req, res) => {
+module.exports = (req, res, DiscordInstance, discordClient) => {
     let body = ''
     req.on('data', (data) => body += data)
     req.on('end', () => {
@@ -22,11 +17,11 @@ module.exports = (req, res) => {
                     mergedColumn(post, res)
                 break;
             case 'discord':
-                discordActions(res, post.action, Discord, discordClient)
+                discordActions(res, post.action, DiscordInstance, discordClient)
                 break;
 
             case 'pullRequest':
-                githubPRActions(res, post, Discord, discordClient)
+                githubPRActions(res, post, DiscordInstance, discordClient)
         }
 
         //If none of these actions is detected, we must put an end to the current request

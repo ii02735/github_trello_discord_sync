@@ -1,25 +1,19 @@
 const http = require('http')
-const eventHandlerTrelloDiscord = require("./api/eventHandlerTrelloDiscord")
-const eventHandlerTrelloGitHub = require("./api/eventHandlerTrelloGitHub")
-const validAddresses = [
-    '107.23.104.115',
-    '107.23.149.70',
-    '54.152.166.250',
-    '54.209.149.230',
-    '18.234.32.2',
-    '192.168.0.254' //local
-];
+const eventHandler = require("./src/eventHandler")
+const userManagement = require("./src/userManagement")
+const Discord = require("discord.js")
+const discordClient = new Discord.Client()
+
+discordClient.once('ready', () => {
+    console.log("client discord ready")
+})
 
 const server = http.createServer((req, res) => {
-    if (req.method === 'POST') {
-        switch(req.url){
-            case "/api/eventHandlerTrelloDiscord.js":
-                eventHandlerTrelloDiscord(req, res)
-                break
-            case "/api/eventHandlerTrelloGitHub.js":
-                eventHandlerTrelloGitHub(req,res)
-        }
-    } else {
+    if (req.method === 'POST' && req.url.includes("eventHandler"))
+            eventHandler(req, res, Discord, discordClient)
+    else if(req.url.includes("users"))
+            userManagement(req,res,discordClient)
+    else {
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.write('<p>Handler for Trello webhook. Events will only be fired from Trello.</p>')
         res.end()
@@ -27,10 +21,6 @@ const server = http.createServer((req, res) => {
 
 })
 
-server.on('connection', (socket) => {
-    const isValid = validAddresses.some((address) => socket.remoteAddress.includes(address))
-    if (!isValid)
-        socket.destroy()
-})
+discordClient.login(process.env.DISCORD_BOT_TOKEN)
 
-server.listen(3000);
+server.listen(process.env.HOST || 3000);
