@@ -1,14 +1,14 @@
+require("dotenv").config()
 const ADD_LABEL_TO_CARD = "addLabelToCard"
 const COMMENT_CARD = "commentCard"
 const UPDATE_COMMENT = "updateComment"
 const DELETE_COMMENT = "deleteComment"
-const { ServerResponse } = require('http')
-const { Collection, Client, Channel } = require('discord.js')
+const { Collection, Client } = require('discord.js')
 const { embedMessageFactory, findDiscordMessageByTrelloCommentId } = require('./util')
 
 /**
  * 
- * @param {ServerResponse} res 
+ * @param {import("express").Response} res 
  * @param {*} actionFromTrello
  * @param {typeof import("discord.js")} DiscordInstance 
  * @param {Client} discordClient 
@@ -16,19 +16,17 @@ const { embedMessageFactory, findDiscordMessageByTrelloCommentId } = require('./
 module.exports = (res, actionFromTrello, DiscordInstance, discordClient) => {
 
     const messageFactoryInstance = embedMessageFactory(DiscordInstance)
-    
+
     switch (actionFromTrello.type) {
 
         case ADD_LABEL_TO_CARD:
 
             if (actionFromTrello.data.text === "Bug") //if label name is equal to Bug -> dispatch to Discord
             {
-                
+
                 const embed = messageFactoryInstance.trelloBug(actionFromTrello)
                 discordClient.channels.cache.get(process.env.DISCORD_BUG_CHANNEL).send(embed)
-                res.writeHead(200);
-                res.end()
-
+                res.status(200).send({ "message": "ok" })
             }
 
             break;
@@ -37,9 +35,7 @@ module.exports = (res, actionFromTrello, DiscordInstance, discordClient) => {
 
             const embed = messageFactoryInstance.trelloComment(actionFromTrello)
             discordClient.channels.cache.get(process.env.DISCORD_CARD_COMMENT_CHANNEL).send(embed)
-            res.writeHead(200);
-            res.end()
-
+            res.status(200).send({ "message": "ok" })
             break;
 
         case DELETE_COMMENT:
@@ -55,12 +51,11 @@ module.exports = (res, actionFromTrello, DiscordInstance, discordClient) => {
                 const messageToBeDeleted = findDiscordMessageByTrelloCommentId(messagesArray, actionFromTrello.data.action.id)
                 if (messageToBeDeleted) // if the message has been retrieved we delete it
                     messageToBeDeleted.delete()
-                if(actionFromTrello.type === UPDATE_COMMENT){ // if an update has been asked, we send a new comment
+                if (actionFromTrello.type === UPDATE_COMMENT) { // if an update has been asked, we send a new comment
                     const embed = messageFactoryInstance.trelloComment(actionFromTrello, true)
                     discordChannel.send(embed)
                 }
-                res.writeHead(200);
-                res.end()
+                res.status(200).send({ "message": "ok" })
             })
     }
 }

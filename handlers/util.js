@@ -1,20 +1,17 @@
 require('dotenv').config()
 const { MessageEmbed } = require('discord.js')
-const fs = require('fs')
+const db = require("../config/db")
 const url = require('url')
-const dataMapping = fs.readFileSync('user-mapping.json')
 
 /**
  * Translate Trello comments to valid Discord messages (with Trello username <-> Discord mapping)
  * @param {*} message Message / comment from Trello
  * @param {boolean} mention Precise if the trello username must be replaced by the user ID from Discord (for mention), else by the discord username
  */
-const translateTrelloToMention = (message, mention = true) => {
+const translateTrelloToMention = async (message, mention = true) => {
 
-    if (message && dataMapping) {
-        const users = JSON.parse(dataMapping)
-        return users.reduce((str, current) => str.replace(`@${current.trello}`, mention ? `<@${current.discord.id}>` : current.discord.username), message)
-    }
+    const users = await db.query("SELECT * FROM users");
+    return users.rows.reduce((str, current) => str.replace(`@${current.trello}`, mention ? `<@${current.discord_id}>` : current.discord_username), message)
 }
 
 /**
@@ -22,13 +19,10 @@ const translateTrelloToMention = (message, mention = true) => {
  * @param {*} message Message / comment from Trello
  * @param {boolean} mention Precise if the trello username must be replaced by the user ID from Discord, else by the discord username
  */
-const translateGithubToMention = (message, mention = true) => {
+const translateGithubToMention = async (message, mention = true) => {
 
-    if (message) {
-        const users = JSON.parse(dataMapping)
-        return users.reduce((str, current) => str.replace(`@${current.github.username}`, mention ? `<@${current.discord.id}>` : current.discord.username), message)
-
-    }
+    const users = await db.query("SELECT * FROM users");
+    return users.rows.reduce((str, current) => str.replace(`@${current.github_username}`, mention ? `<@${current.discord_id}>` : current.discord_username), message)
 }
 
 /**

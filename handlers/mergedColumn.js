@@ -55,8 +55,7 @@ module.exports = (data, res) => (async function (data, res) {
     } catch (e) {
         console.log(e)
     }
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end()
+    res.status(200).send({ "message": "ok" })
 
 })(data, res)
 

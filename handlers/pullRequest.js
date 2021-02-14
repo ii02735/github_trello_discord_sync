@@ -1,7 +1,6 @@
 require('dotenv').config()
-const { ServerResponse } = require('http');
 const { Client, Channel, Collection } = require('discord.js');
-const { embedMessageFactory, findDiscordMessageByGitHubPRCommentURL } = require('./util');
+const { embedMessageFactory, findDiscordMessageByGitHubPRCommentURL } = require("./util");
 
 const ADDED_COMMENT = 'created'
 const EDITED_COMMENT = 'edited'
@@ -9,7 +8,7 @@ const DELETED_COMMENT = 'deleted'
 
 /**
  * 
- * @param {ServerResponse} res 
+ * @param {import("express").Response} res 
  * @param {*} data github data sent
  * @param {typeof import("discord.js")} DiscordInstance 
  * @param {Client} discordClient 
@@ -26,9 +25,7 @@ module.exports = (res, data, DiscordInstance, discordClient) => {
         case ADDED_COMMENT:
             const embed = messageFactoryInstance.githubPRComment(data)
             discordChannel.send(embed)
-            res.writeHead(200)
-            res.end()
-
+            res.status(200).send({ "message": "ok" })
             break;
 
         case EDITED_COMMENT:
@@ -48,9 +45,13 @@ module.exports = (res, data, DiscordInstance, discordClient) => {
                         const embed = messageFactoryInstance.githubPRComment(data)
                         discordChannel.send(embed)
                     }
-                    res.writeHead(200);
-                    res.end()
+                    res.status(200).send({ "message": "ok" })
                 })
             }
     }
+    /**
+     * For GitHub usage only
+     * GitHub will ask a response when the webhook will be attached
+     */
+    res.status(200).send({ "message": "ping ok" })
 }
