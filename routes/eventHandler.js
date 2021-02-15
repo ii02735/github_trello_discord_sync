@@ -6,9 +6,9 @@ const discordActions = require('../handlers/discordNotification')
 const githubPRActions = require('../handlers/pullRequest');
 const { Discord, discordClient } = require("../config/discord");
 
-router.post("/mergedColumn", (req, res) => {
+router.post("/mergedColumn", async (req, res) => {
     if (req.body.action && checkIfListHasChanged(req.body.action))
-        mergedColumn(req.body, res)
+        await mergedColumn(req.body, res)
     else
         res.status(200).send({ "error": `action ${req.body.action} cannot be handled` })
 })
@@ -18,8 +18,8 @@ router.get("/mergedColumn", (req, res) => {
     res.send({ "message": "ping ok" })
 })
 
-router.post("/discord", (req, res) => {
-    discordActions(res, req.body.action, Discord, discordClient)
+router.post("/discord", async (req, res) => {
+    await discordActions(res, req.body.action, Discord, discordClient)
 })
 
 /**
