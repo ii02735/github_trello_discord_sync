@@ -1,5 +1,4 @@
-if (process.env.NODE_ENV != "production")
-    require('dotenv').config()
+require('dotenv').config()
 const fetch = require('node-fetch') // for Trello API
 const octokit = require('@octokit/rest')
 const Octokit = new octokit.Octokit({

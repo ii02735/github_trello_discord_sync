@@ -10,7 +10,12 @@ router.post("/mergedColumn", (req, res) => {
     if (req.body.action && checkIfListHasChanged(req.body.action))
         mergedColumn(req.body, res)
     else
-        res.status(400).send({ "error": `action ${req.body.action} cannot be handled` })
+        res.status(200).send({ "error": `action ${req.body.action} cannot be handled` })
+})
+
+
+router.get("/mergedColumn", (req, res) => {
+    res.send({ "message": "ping ok" })
 })
 
 router.post("/discord", (req, res) => {
