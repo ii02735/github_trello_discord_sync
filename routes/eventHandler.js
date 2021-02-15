@@ -17,10 +17,26 @@ router.post("/discord", (req, res) => {
     discordActions(res, req.body.action, Discord, discordClient)
 })
 
+/**
+ * For Trello usage only
+ * Trello will ask a response when the webhook will be attached
+ */
+router.get("/discord", (req, res) => {
+    res.send({ "message": "ping ok" })
+})
+
 
 router.post("/pullRequest", (req, res) => {
     githubPRActions(res, req.body, Discord, discordClient)
 })
+/**
+ * For Trello usage only
+ * Trello will ask a response when the webhook will be attached
+ */
+router.get("/pullRequest", (req, res) => {
+    res.send({ "message": "ping ok" })
+})
+
 
 
 const checkIfListHasChanged = (actionFromTrello) => {

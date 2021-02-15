@@ -59,10 +59,7 @@ module.exports = async (res, actionFromTrello, DiscordInstance, discordClient) =
             })
 
         default:
-            /**
-             * For Trello usage only
-             * Trello will ask a response when the webhook will be attached
-             */
-            res.status(200).send({ "message": "ping ok" })
+
+            res.status(404).send({ "message": `${actionFromTrello.type} not handled` })
     }
 }
