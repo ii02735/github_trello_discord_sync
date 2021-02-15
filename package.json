@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "develop": "nodemon index.js",
     "start": "node index.js",
-    "migrate": "node-pg-migrate"
+    "migrate": "node-pg-migrate",
+    "heroku-postbuild": "npm run migrate up"
   },
   "author": "",
   "license": "ISC",
