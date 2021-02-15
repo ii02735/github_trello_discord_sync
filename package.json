@@ -21,7 +21,9 @@
     "express-promise-router": "^4.0.1",
     "node-fetch": "^2.6.1",
     "node-pg-migrate": "^5.9.0",
-    "nodemon": "^2.0.7",
     "pg": "^8.5.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
   }
 }
