@@ -39,7 +39,7 @@ module.exports.embedMessageFactory = async (DiscordInstance) => ({
         .setDescription(await translateTrelloToMention(actionFromTrello.data.text))
         .setAuthor(actionFromTrello.data.board.name, 'https://www.dropbox.com/s/4uedurjpi5igbos/Trello%20logo%20-%20Imgur.png?raw=1', 'https://discord.js.org')
         .setThumbnail('https://trello-backgrounds.s3.amazonaws.com/SharedBackground/140x93/c3b3405cfa3055a1f67d306d52eb5007/photo-1542779283-429940ce8336.jpg')
-        .setFooter(translateTrelloToMention(`Par @${actionFromTrello.memberCreator.username}`, false))
+        .setFooter(await translateTrelloToMention(`Par @${actionFromTrello.memberCreator.username}`, false))
         .setTimestamp(),
 
     trelloComment: async (actionFromTrello, update = false) => new DiscordInstance.MessageEmbed()

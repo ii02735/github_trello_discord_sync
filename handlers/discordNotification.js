@@ -46,13 +46,13 @@ module.exports = async (res, actionFromTrello, DiscordInstance, discordClient) =
             /**
              * The fetch method will retrieve by default (if no paramter is set) the last 50 messages
              */
-            discordChannel.messages.fetch().then(/**@param {Collection} messages**/(messages) => {
+            discordChannel.messages.fetch().then(/**@param {Collection} messages**/async (messages) => {
                 const messagesArray = Array.from(messages.values())
                 const messageToBeDeleted = findDiscordMessageByTrelloCommentId(messagesArray, actionFromTrello.data.action.id)
                 if (messageToBeDeleted) // if the message has been retrieved we delete it
                     messageToBeDeleted.delete()
                 if (actionFromTrello.type === UPDATE_COMMENT) { // if an update has been asked, we send a new comment
-                    const embed = messageFactoryInstance.trelloComment(actionFromTrello, true)
+                    const embed = await messageFactoryInstance.trelloComment(actionFromTrello, true)
                     discordChannel.send(embed)
                 }
                 res.status(200).send({ "message": "ok" })
