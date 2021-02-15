@@ -4,7 +4,7 @@ const COMMENT_CARD = "commentCard"
 const UPDATE_COMMENT = "updateComment"
 const DELETE_COMMENT = "deleteComment"
 const { Collection, Client } = require('discord.js')
-const { embedMessageFactory, findDiscordMessageByTrelloCommentId } = require('./util')
+const { embedMessageFactory, findDiscordMessageByTrelloCommentId } = require("./util")
 
 /**
  * 
@@ -13,9 +13,9 @@ const { embedMessageFactory, findDiscordMessageByTrelloCommentId } = require('./
  * @param {typeof import("discord.js")} DiscordInstance 
  * @param {Client} discordClient 
  */
-module.exports = (res, actionFromTrello, DiscordInstance, discordClient) => {
+module.exports = async (res, actionFromTrello, DiscordInstance, discordClient) => {
 
-    const messageFactoryInstance = embedMessageFactory(DiscordInstance)
+    const messageFactoryInstance = await embedMessageFactory(DiscordInstance)
 
     switch (actionFromTrello.type) {
 
@@ -24,7 +24,7 @@ module.exports = (res, actionFromTrello, DiscordInstance, discordClient) => {
             if (actionFromTrello.data.text === "Bug") //if label name is equal to Bug -> dispatch to Discord
             {
 
-                const embed = messageFactoryInstance.trelloBug(actionFromTrello)
+                const embed = await messageFactoryInstance.trelloBug(actionFromTrello)
                 discordClient.channels.cache.get(process.env.DISCORD_BUG_CHANNEL).send(embed)
                 res.status(200).send({ "message": "ok" })
             }
@@ -33,7 +33,7 @@ module.exports = (res, actionFromTrello, DiscordInstance, discordClient) => {
 
         case COMMENT_CARD:
 
-            const embed = messageFactoryInstance.trelloComment(actionFromTrello)
+            const embed = await messageFactoryInstance.trelloComment(actionFromTrello)
             discordClient.channels.cache.get(process.env.DISCORD_CARD_COMMENT_CHANNEL).send(embed)
             res.status(200).send({ "message": "ok" })
             break;

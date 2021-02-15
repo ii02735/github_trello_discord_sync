@@ -13,12 +13,8 @@ router.post("/mergedColumn", (req, res) => {
         res.status(400).send({ "error": `action ${req.body.action} cannot be handled` })
 })
 
-router.post("/discord", (req, res) => {
-    discordActions(res, req.body.action, Discord, discordClient)
-})
-
-router.get("/discord", (req, res) => {
-    res.send({ "message": "hello world" })
+router.post("/discord", async (req, res) => {
+    await discordActions(res, req.body.action, Discord, discordClient)
 })
 
 

@@ -29,36 +29,36 @@ const translateGithubToMention = async (message, mention = true) => {
  * Factory to create embed messages (for bug report, trello card comment)
  * @param {typeof import("discord.js")} DiscordInstance 
  */
-module.exports.embedMessageFactory = (DiscordInstance) => ({
+module.exports.embedMessageFactory = async (DiscordInstance) => ({
 
-    trelloBug: (actionFromTrello) => new DiscordInstance.MessageEmbed()
+    trelloBug: async (actionFromTrello) => new DiscordInstance.MessageEmbed()
         .setColor('#EB5A46')
         .setTitle(actionFromTrello.data.card.name)
         .setURL(`https://trello.com/${actionFromTrello.data.card.shortLink}`)
-        .setDescription(translateTrelloToMention(actionFromTrello.data.text))
+        .setDescription(await translateTrelloToMention(actionFromTrello.data.text))
         .setAuthor(actionFromTrello.data.board.name, 'https://www.dropbox.com/s/4uedurjpi5igbos/Trello%20logo%20-%20Imgur.png?raw=1', 'https://discord.js.org')
         .setThumbnail('https://trello-backgrounds.s3.amazonaws.com/SharedBackground/140x93/c3b3405cfa3055a1f67d306d52eb5007/photo-1542779283-429940ce8336.jpg')
         .setFooter(translateTrelloToMention(`Par @${actionFromTrello.memberCreator.username}`, false))
         .setTimestamp(),
 
-    trelloComment: (actionFromTrello, update = false) => new DiscordInstance.MessageEmbed()
+    trelloComment: async (actionFromTrello, update = false) => new DiscordInstance.MessageEmbed()
         .setColor('#0079bf')
         .setTitle(actionFromTrello.data.card.name)     //the Trello Card comment ID is written into the URL in order to retrieve it later for updates / deletions purposes
         .setURL(`https://trello.com/c/${actionFromTrello.data.card.shortLink}?commentId=${update ? actionFromTrello.data.action.id : actionFromTrello.id}`)
-        .setDescription(translateTrelloToMention(update ? actionFromTrello.data.action.text : actionFromTrello.data.text))
+        .setDescription(await translateTrelloToMention(update ? actionFromTrello.data.action.text : actionFromTrello.data.text))
         .setAuthor(actionFromTrello.data.board.name, 'https://www.dropbox.com/s/4uedurjpi5igbos/Trello%20logo%20-%20Imgur.png?raw=1', 'https://discord.js.org')
         .setThumbnail('https://trello-backgrounds.s3.amazonaws.com/SharedBackground/140x93/c3b3405cfa3055a1f67d306d52eb5007/photo-1542779283-429940ce8336.jpg')
-        .setFooter(translateTrelloToMention(`Commentaire de @${actionFromTrello.memberCreator.username}`, false))
+        .setFooter(await translateTrelloToMention(`Commentaire de @${actionFromTrello.memberCreator.username}`, false))
         .setTimestamp(),
 
-    githubPRComment: (data) => new DiscordInstance.MessageEmbed()
+    githubPRComment: async (data) => new DiscordInstance.MessageEmbed()
         .setColor("#ffffff")
         .setTitle(data.issue.title)
         .setURL(data.comment.html_url)
-        .setDescription(translateGithubToMention(data.comment.body))
+        .setDescription(await translateGithubToMention(data.comment.body))
         .setAuthor(`${data.repository.name} Pull Request`, 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png')
         .setThumbnail('https://trello-backgrounds.s3.amazonaws.com/SharedBackground/140x93/c3b3405cfa3055a1f67d306d52eb5007/photo-1542779283-429940ce8336.jpg')
-        .setFooter(translateGithubToMention(`Commentaire de @${data.sender.login}`, false))
+        .setFooter(await translateGithubToMention(`Commentaire de @${data.sender.login}`, false))
         .setTimestamp()
 })
 
@@ -97,9 +97,8 @@ module.exports.findDiscordMessageByTrelloCommentId = (messages, trelloID) => {
 module.exports.findDiscordMessageByGitHubPRCommentURL = (messages, data) => {
     let retrievedMessage = null;
     // In those 50 messages, only from the bot are concerned
-    const botMessages = messages.filter((message) => { console.log(message.author.username, process.env.DISCORD_BOT_USERNAME); return message.author.username === process.env.DISCORD_BOT_USERNAME })
-    // We must now retrieve the message with the correct comment ID from Trello
-    console.log(botMessages.length)
+    const botMessages = messages.filter((message) =>  message.author.username === process.env.DISCORD_BOT_USERNAME )
+    // We must now retrieve the discord message with the correct Trello comment ID
     if (botMessages.length > 0)
         retrievedMessage = botMessages.find((message) => {
             console.log(message.embeds.length > 0 ? message.embeds[0].url : null)
