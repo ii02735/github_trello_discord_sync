@@ -1,4 +1,5 @@
-require('dotenv').config()
+if (process.env.NODE_ENV != "production")
+    require('dotenv').config()
 const Router = require("express-promise-router");
 const router = new Router()
 const db = require("../config/db")

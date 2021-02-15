@@ -1,4 +1,5 @@
-require('dotenv').config()
+if (process.env.NODE_ENV != "production")
+    require('dotenv').config()
 const { MessageEmbed } = require('discord.js')
 const db = require("../config/db")
 const url = require('url')
@@ -97,7 +98,7 @@ module.exports.findDiscordMessageByTrelloCommentId = (messages, trelloID) => {
 module.exports.findDiscordMessageByGitHubPRCommentURL = (messages, data) => {
     let retrievedMessage = null;
     // In those 50 messages, only from the bot are concerned
-    const botMessages = messages.filter((message) =>  message.author.username === process.env.DISCORD_BOT_USERNAME )
+    const botMessages = messages.filter((message) => message.author.username === process.env.DISCORD_BOT_USERNAME)
     // We must now retrieve the discord message with the correct Trello comment ID
     if (botMessages.length > 0)
         retrievedMessage = botMessages.find((message) => {
