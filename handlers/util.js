@@ -18,10 +18,13 @@ const translateTrelloToMention = async (message, mention = true) => {
  * @param {*} message Message / comment from Trello
  * @param {boolean} mention Precise if the trello username must be replaced by the user ID from Discord, else by the discord username
  */
-const translateGithubToMention = async (message, mention = true) => {
+const translateGithubToMention = async (message, mention = true, section = null) => {
 
-    const users = await db.query("SELECT * FROM users");
-    return users.rows.reduce((str, current) => str.replace(`@${current.github_username}`, mention ? `<@${current.discord_id}>` : current.discord_username), message)
+    if(message){
+      const users = await db.query("SELECT * FROM users");
+      return users.rows.reduce((str, current) => current.github_username ? str.replace(`@${current.github_username}`, mention ? `<@${current.discord_id}>` : current.discord_username) : str, message)
+    }else
+        return null;
 }
 
 /**
@@ -50,16 +53,59 @@ module.exports.embedMessageFactory = async (DiscordInstance) => ({
         .setFooter(await translateTrelloToMention(`Commentaire de @${actionFromTrello.memberCreator.username}`, false))
         .setTimestamp(),
 
-    githubPRComment: async (data) => new DiscordInstance.MessageEmbed()
+    githubPRComment: async (data) => { 
+        
+        const embed = new DiscordInstance.MessageEmbed()
         .setColor("#ffffff")
-        .setTitle(data.issue.title)
-        .setURL(data.comment.html_url)
-        .setDescription(await translateGithubToMention(data.comment.body))
+        .setTitle(determineTitle(data))
+        .setURL(determineURL(data))
+        .setDescription(await translateGithubToMention(determineBody(data),true))
         .setAuthor(`${data.repository.name} Pull Request`, 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png')
         .setThumbnail('https://trello-backgrounds.s3.amazonaws.com/SharedBackground/140x93/c3b3405cfa3055a1f67d306d52eb5007/photo-1542779283-429940ce8336.jpg')
         .setFooter(await translateGithubToMention(`Commentaire de @${data.sender.login}`, false))
         .setTimestamp()
+        
+        if(data.comment.diff_hunk && data.comment.path)
+        {
+            const language = data.comment.path.split('.').reverse()[0];
+            /**
+             * @param {string[]} diff_hunk
+             */
+            let diff_hunk = data.comment.diff_hunk.split('\n')
+            diff_hunk.shift()
+            embed.addField(data.comment.path,"```"+language+"\n"+diff_hunk.join('\n')+"```")
+        }
+        return embed;
+    }
 })
+
+const determineURL = (data) => {
+    if(data.review)
+        return data.review.html_url
+    if(data.comment)
+        return data.comment.html_url
+}
+
+const determineBody = (data) => {
+    if(data.comment)
+        return data.comment.body
+    if(data.review)
+        return data.review.body
+    if(data.body)
+        return data.body
+    return null;
+}
+
+const determineTitle = (data) => {
+    if(data.pull_request)
+        return data.pull_request.title
+    if(data.issue)
+        return data.issue.title
+    if(data.comment){
+        return data.comment._links.pull_request.title
+    }
+    return null;
+}
 
 /**
  * Find a message on discord's channel by Trello comment ID
@@ -112,7 +158,7 @@ module.exports.findDiscordMessageByGitHubPRCommentURL = (messages, data) => {
                     * and the "url" must exist in order to retrieve the comment ID inside of it
                     */
                 && message.embeds[0].url
-                && message.embeds[0].url === data.comment.html_url)
+                && message.embeds[0].url === (data.review ? data.review.html_url : data.comment.html_url))
         })
     return retrievedMessage
 
