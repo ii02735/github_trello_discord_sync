@@ -1,5 +1,3 @@
-if (process.env.NODE_ENV != "production")
-    require('dotenv').config()
 const { MessageEmbed } = require('discord.js')
 const db = require("../config/db")
 const url = require('url')
