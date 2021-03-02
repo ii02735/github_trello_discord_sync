@@ -71,9 +71,12 @@ module.exports.embedMessageFactory = async (DiscordInstance) => ({
             /**
              * @param {string[]} diff_hunk
              */
-            let diff_hunk = data.comment.diff_hunk.split('\n')
+            let diff_hunk = data.comment.diff_hunk.split(/\r?\n/)
             diff_hunk.shift()
-            embed.addField(data.comment.path,"```"+language+"\n"+diff_hunk.join('\n')+"```")
+            let code_block = [];
+            for(let i = 0; i <= data.comment.original_line - data.comment.original_start_line; i++)
+                code_block.push(diff_hunk.pop())
+            embed.addField(data.comment.path,"```"+language+'\n'+code_block.reverse().join('\n')+"```")
         }
         return embed;
     }
