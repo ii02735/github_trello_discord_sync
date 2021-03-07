@@ -76,7 +76,10 @@ module.exports.embedMessageFactory = async (DiscordInstance) => ({
             let code_block = [];
             for(let i = 0; i <= data.comment.original_line - data.comment.original_start_line; i++)
                 code_block.push(diff_hunk.pop())
-            embed.addField(data.comment.path,"```"+language+'\n'+code_block.reverse().join('\n')+"```")
+            if(code_block.length <= 1024)
+                embed.addField(data.comment.path,"```"+language+'\n'+code_block.reverse().join('\n')+"```")
+            else
+                embed.addField(data.comment.path,"")
         }
         return embed;
     }
