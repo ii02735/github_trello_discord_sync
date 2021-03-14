@@ -7,6 +7,7 @@ const ADDED_COMMENT = 'created'
 const EDITED_COMMENT = 'edited'
 const DELETED_COMMENT = 'deleted'
 const SUBMITTED_COMMENT = 'submitted' // comment from review
+const CREATED_PR = 'opened'
 
 /**
  * 
@@ -55,6 +56,10 @@ module.exports = async (res, data, DiscordInstance, discordClient) => {
                     })
                 }
                 break;
+            
+            case CREATED_PR:
+
+            
                 
             default:
                 /**
