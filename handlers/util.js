@@ -53,6 +53,15 @@ module.exports.embedMessageFactory = async (DiscordInstance) => ({
         .setFooter(await translateTrelloToMention(`Commentaire de @${actionFromTrello.memberCreator.username}`, false))
         .setTimestamp(),
 
+    createdGitHubPR: async (data) => new DiscordInstance.MessageEmbed()
+        .setColor("#ffffff")
+        .setTitle(data.pull_request.title)
+        .setURL(data.pull_request.html_url)
+        .setAuthor(`${data.repository.name} New Pull Request`, 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png')
+        .setThumbnail('https://trello-backgrounds.s3.amazonaws.com/SharedBackground/140x93/c3b3405cfa3055a1f67d306d52eb5007/photo-1542779283-429940ce8336.jpg')
+        .setFooter(await translateGithubToMention(`Pull Request créée par @${data.sender.login}`, false))
+        .setTimestamp(),
+
     githubPRComment: async (data) => { 
         
         const embed = new DiscordInstance.MessageEmbed()
@@ -60,7 +69,7 @@ module.exports.embedMessageFactory = async (DiscordInstance) => ({
         .setTitle(determineTitle(data))
         .setURL(determineURL(data))
         .setDescription(await translateGithubToMention(determineBody(data),true))
-        .setAuthor(`${data.repository.name} Pull Request`, 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png')
+        .setAuthor(`${data.repository.name} Pull Request comment`, 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png')
         .setThumbnail('https://trello-backgrounds.s3.amazonaws.com/SharedBackground/140x93/c3b3405cfa3055a1f67d306d52eb5007/photo-1542779283-429940ce8336.jpg')
         .setFooter(await translateGithubToMention(`Commentaire de @${data.sender.login}`, false))
         .setTimestamp()
